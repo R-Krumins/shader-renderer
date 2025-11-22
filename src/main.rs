@@ -3,6 +3,7 @@ use std::{
     io::{self, Write, stdout},
     path::Path,
     process::Command,
+    time::Instant,
 };
 
 mod math;
@@ -15,7 +16,7 @@ use crate::math::Vec2;
 const WIDTH: usize = 720;
 const HEIGHT: usize = 480;
 const COLOR_DEPTH: usize = 255;
-const FRAME_COUNT: usize = 60;
+const FRAME_COUNT: usize = 12;
 
 const FRAME_DIR: &str = "./frames";
 const OUTPUT_VIDEO: &str = "render.mp4";
@@ -31,6 +32,11 @@ fn main() {
         time: 0.0,
     };
 
+    println!("Rendering...");
+    print!("\rframe 0/{FRAME_COUNT}");
+    stdout().flush().unwrap();
+
+    let time = Instant::now();
     for i in 0..FRAME_COUNT {
         let mut data = [0u8; WIDTH * HEIGHT * 3];
         shader_args.time = i as f32 / FRAME_COUNT as f32;
@@ -55,9 +61,11 @@ fn main() {
         print!("\rframe {}/{FRAME_COUNT}", i + 1);
         stdout().flush().unwrap();
     }
+    let elapsed = time.elapsed();
 
     println!();
-    println!("rendering...");
+    println!("rendered {FRAME_COUNT} frames in {elapsed:.2?}");
+    println!("Stiching frames...");
     render(OUTPUT_VIDEO).unwrap();
     println!("finished! output: {OUTPUT_VIDEO}");
 }
