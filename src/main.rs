@@ -15,7 +15,7 @@ use crate::math::Vec2;
 const WIDTH: usize = 720;
 const HEIGHT: usize = 480;
 const COLOR_DEPTH: usize = 255;
-const FRAME_COUNT: usize = 120;
+const FRAME_COUNT: usize = 60;
 
 const FRAME_DIR: &str = "./frames";
 const OUTPUT_VIDEO: &str = "render.mp4";
@@ -39,7 +39,7 @@ fn main() {
                 shader_args.frag_coord.x = x as f32;
                 shader_args.frag_coord.y = y as f32;
 
-                let frag = shader::gradient(&shader_args);
+                let frag = shader::cyberspace(&shader_args);
                 let i = (y * WIDTH + x) * 3;
                 data[i] = (frag.x * 255.0) as u8;
                 data[i + 1] = (frag.y * 255.0) as u8;
