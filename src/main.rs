@@ -16,7 +16,7 @@ use crate::math::Vec2;
 const WIDTH: usize = 720;
 const HEIGHT: usize = 480;
 const COLOR_DEPTH: usize = 255;
-const FRAME_COUNT: usize = 12;
+const FRAME_COUNT: usize = 120;
 
 const FRAME_DIR: &str = "./frames";
 const OUTPUT_VIDEO: &str = "render.mp4";
@@ -37,8 +37,8 @@ fn main() {
     stdout().flush().unwrap();
 
     let time = Instant::now();
+    let mut data = [0u8; WIDTH * HEIGHT * 3];
     for i in 0..FRAME_COUNT {
-        let mut data = [0u8; WIDTH * HEIGHT * 3];
         shader_args.time = i as f32 / FRAME_COUNT as f32;
         for y in 0..HEIGHT {
             for x in 0..WIDTH {

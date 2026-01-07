@@ -15,6 +15,7 @@ pub struct Vec2 {
 macro_rules! impl_vec3_swizzles {
     ($($name:ident: $a:ident $b:ident $c:ident),* $(,)?) => {
         $(
+            #[allow(dead_code)]
             pub fn $name(&self) -> Vec3 {
                 Vec3::new(self.$a, self.$b, self.$c)
             }
@@ -46,6 +47,7 @@ impl Vec3 {
         yxy: y x y,
     }
 
+    #[allow(dead_code)]
     pub fn mix(a: Vec3, b: Vec3, t: f32) -> Self {
         Self {
             x: a.x * (1. - t) + b.x * t,
