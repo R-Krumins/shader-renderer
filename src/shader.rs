@@ -7,6 +7,16 @@ pub struct ShaderArgs {
     pub time: f32,
 }
 
+impl ShaderArgs {
+    pub fn new(width: usize, height: usize) -> Self {
+        Self {
+            frag_coord: Vec2::zero(),
+            resolution: Vec2::new(width as f32, height as f32),
+            time: 0.0,
+        }
+    }
+}
+
 #[allow(dead_code)]
 pub fn gradient(args: &ShaderArgs) -> Vec3 {
     let c1 = hex!("#ff0000");
