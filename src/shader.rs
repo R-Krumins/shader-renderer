@@ -1,6 +1,7 @@
 use crate::hex;
 use crate::math::*;
 
+#[derive(Clone)]
 pub struct ShaderArgs {
     pub frag_coord: Vec2,
     pub resolution: Vec2,

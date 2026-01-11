@@ -3,6 +3,8 @@ use std::{
     io::{self, Write, stdout},
     path::Path,
     process::{Command, Stdio},
+    sync::mpsc::{self, Sender},
+    thread,
     time::Instant,
 };
 
@@ -13,7 +15,8 @@ use shader::ShaderArgs;
 
 const WIDTH: usize = 720;
 const HEIGHT: usize = 480;
-const FRAME_COUNT: usize = 120;
+const FRAME_COUNT: usize = 60;
+const CORE_COUNT: usize = 4;
 
 const FRAME_DIR: &str = "./frames";
 const OUTPUT_VIDEO: &str = "render.mp4";
@@ -22,26 +25,39 @@ fn main() {
     setup();
 
     let shader_args = ShaderArgs::new(WIDTH, HEIGHT);
-
+    let (tx, rx) = mpsc::channel::<()>();
     let time = Instant::now();
-    render(shader_args);
-    let elapsed = time.elapsed();
 
-    println!();
-    println!("rendered {FRAME_COUNT} frames in {elapsed:.2?}");
-    println!("Stiching frames...");
-    make_video(OUTPUT_VIDEO).unwrap();
-    println!("finished! output: {OUTPUT_VIDEO}");
-}
+    for core_idx in 0..CORE_COUNT {
+        // divvy up the frames via round robin
+        let frames = (core_idx..FRAME_COUNT).step_by(CORE_COUNT).collect();
+        let args = shader_args.clone();
+        let tx1 = tx.clone();
+        thread::spawn(|| render(args, frames, tx1));
+    }
+    drop(tx);
 
-fn render(mut shader_args: ShaderArgs) {
-    println!("Rendering...");
+    println!("Rendering using {CORE_COUNT} cores...");
     print!("\rframe 0/{FRAME_COUNT}");
     stdout().flush().unwrap();
 
-    let mut frame = [0u8; WIDTH * HEIGHT * 3];
-    for i in 0..FRAME_COUNT {
-        shader_args.time = i as f32 / FRAME_COUNT as f32;
+    let mut frames_rendered = 0;
+    for frame_finisehd in rx {
+        frames_rendered += 1;
+        print!("\rframe {frames_rendered}/{FRAME_COUNT}");
+        stdout().flush().unwrap();
+    }
+
+    let elapsed = time.elapsed();
+    println!("\nrendered {FRAME_COUNT} frames in {elapsed:.2?}");
+
+    make_video(OUTPUT_VIDEO)
+}
+
+fn render(mut shader_args: ShaderArgs, frames: Vec<usize>, tx: Sender<()>) {
+    let mut pixels = [0u8; WIDTH * HEIGHT * 3];
+    for f in frames {
+        shader_args.time = f as f32 / FRAME_COUNT as f32;
         for y in 0..HEIGHT {
             for x in 0..WIDTH {
                 shader_args.frag_coord.x = x as f32;
@@ -49,16 +65,13 @@ fn render(mut shader_args: ShaderArgs) {
 
                 let frag = shader::cyberspace(&shader_args);
                 let i = (y * WIDTH + x) * 3;
-                frame[i] = (frag.x * 255.0) as u8;
-                frame[i + 1] = (frag.y * 255.0) as u8;
-                frame[i + 2] = (frag.z * 255.0) as u8;
+                pixels[i] = (frag.x * 255.0) as u8;
+                pixels[i + 1] = (frag.y * 255.0) as u8;
+                pixels[i + 2] = (frag.z * 255.0) as u8;
             }
         }
-
-        save_frame(&frame, i);
-
-        print!("\rframe {}/{FRAME_COUNT}", i + 1);
-        stdout().flush().unwrap();
+        save_frame(&pixels, f);
+        tx.send(()).unwrap();
     }
 }
 
@@ -97,7 +110,8 @@ fn save_frame(frame: &[u8], idx: usize) {
     assert!(status.success());
 }
 
-fn make_video(output: &str) -> io::Result<std::process::ExitStatus> {
+fn make_video(output: &str) {
+    println!("Making video...");
     Command::new("ffmpeg")
         .args([
             "-hide_banner",
@@ -113,6 +127,8 @@ fn make_video(output: &str) -> io::Result<std::process::ExitStatus> {
             output,
         ])
         .status()
+        .unwrap();
+    println!("finished! output: {OUTPUT_VIDEO}");
 }
 
 fn setup() {
