@@ -42,7 +42,7 @@ fn main() {
     stdout().flush().unwrap();
 
     let mut frames_rendered = 0;
-    for frame_finisehd in rx {
+    for _frame_finisehd in rx {
         frames_rendered += 1;
         print!("\rframe {frames_rendered}/{FRAME_COUNT}");
         stdout().flush().unwrap();
@@ -63,7 +63,7 @@ fn render(mut shader_args: ShaderArgs, frames: Vec<usize>, tx: Sender<()>) {
                 shader_args.frag_coord.x = x as f32;
                 shader_args.frag_coord.y = y as f32;
 
-                let frag = shader::cyberspace(&shader_args);
+                let frag = (shader_args.shader)(&shader_args);
                 let i = (y * WIDTH + x) * 3;
                 pixels[i] = (frag.x * 255.0) as u8;
                 pixels[i + 1] = (frag.y * 255.0) as u8;

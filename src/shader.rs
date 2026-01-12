@@ -6,6 +6,7 @@ pub struct ShaderArgs {
     pub frag_coord: Vec2,
     pub resolution: Vec2,
     pub time: f32,
+    pub shader: fn(&ShaderArgs) -> Vec3,
 }
 
 impl ShaderArgs {
@@ -14,6 +15,7 @@ impl ShaderArgs {
             frag_coord: Vec2::zero(),
             resolution: Vec2::new(width as f32, height as f32),
             time: 0.0,
+            shader: plasma,
         }
     }
 }
@@ -57,4 +59,21 @@ pub fn cyberspace(args: &ShaderArgs) -> Vec3 {
         o += Vec3::new(z, 1.0, 9.0) / d;
     }
     (o / 7e3).tanh()
+}
+
+pub fn plasma(args: &ShaderArgs) -> Vec3 {
+    let p = (args.frag_coord * 2.0 - args.resolution) / args.resolution.y;
+    let l = Vec2::zero() + (0.7 - p.dot(p)).abs();
+    let mut v = p * Vec2::new(1.0 - l.x, 1.0 - l.y) / 0.2;
+    let mut o = Vec3::zero();
+
+    let mut i = 1.0;
+    while i <= 8.0 {
+        o += (v.xyy().sin() + 1.0) * (v.x - v.y).abs() * 0.2;
+        v += (v.yx() * i + Vec2::new(0.0, i) + args.time).cos() / i + 0.7;
+        i += 1.0;
+    }
+    let vertical = (Vec3::new(1.0, -1.0, -2.0) * p.y).exp();
+    let atten = (-4.0 * l.x).exp();
+    (vertical * atten / o).tanh()
 }
