@@ -20,16 +20,18 @@ pub struct ShaderArgs {
     pub resolution: Vec2,
     pub frame_count: f32,
     pub time: f32,
+    pub speed: f32,
     pub shader: ShaderFn,
 }
 
 impl ShaderArgs {
-    pub fn new(width: usize, height: usize, frame_count: usize, shader: ShaderFn) -> Self {
+    pub fn new(width: usize, height: usize, frame_count: usize, speed: f32, shader: ShaderFn) -> Self {
         Self {
             frag_coord: Vec2::zero(),
             resolution: Vec2::new(width as f32, height as f32),
             frame_count: frame_count as f32,
             time: 0.0,
+            speed,
             shader,
         }
     }

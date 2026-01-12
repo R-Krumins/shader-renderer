@@ -15,6 +15,7 @@ pub struct Config {
     pub frame_rate: usize,
     pub frames: usize,
     pub core_count: usize,
+    pub speed: f32,
     pub frame_dir: String,
     pub output: String,
     pub output_format: OutputFormat,
@@ -44,6 +45,11 @@ impl Config {
         let frame_rate = get_usize("frame_rate");
         let frames = get_usize("frames");
         let core_count = get_usize("core_count");
+        let speed = cfg
+            .get("speed")
+            .expect("speed not given in config")
+            .parse::<f32>()
+            .expect("invalid speed value");
 
         let frame_dir = cfg
             .get("frame_dir")
@@ -84,6 +90,7 @@ impl Config {
             frame_rate,
             frames,
             core_count,
+            speed,
             frame_dir,
             output,
             output_format,

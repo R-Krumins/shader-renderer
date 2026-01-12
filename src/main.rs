@@ -18,7 +18,7 @@ use shader::ShaderArgs;
 fn main() {
     let cfg = Config::parse_config_file();
     setup(&cfg.frame_dir);
-    let shader_args = ShaderArgs::new(cfg.width, cfg.height, cfg.frames, cfg.shader);
+    let shader_args = ShaderArgs::new(cfg.width, cfg.height, cfg.frames, cfg.speed, cfg.shader);
     let (tx, rx) = mpsc::channel::<()>();
     let time = Instant::now();
 
@@ -28,7 +28,7 @@ fn main() {
         let args = shader_args.clone();
         let tx1 = tx.clone();
         let frame_dir = cfg.frame_dir.clone();
-        thread::spawn(|| render(args, frames, tx1, frame_dir));
+        thread::spawn(move || render(args, frames, tx1, frame_dir));
     }
     drop(tx);
 
@@ -61,7 +61,7 @@ fn render(mut shader_args: ShaderArgs, frames: Vec<usize>, tx: Sender<()>, frame
     let mut pixels = vec![0u8; width * height * 3];
 
     for f in frames {
-        shader_args.time = f as f32 / shader_args.frame_count;
+        shader_args.time = (f as f32 / shader_args.frame_count) * shader_args.speed;
         for y in 0..height {
             for x in 0..width {
                 shader_args.frag_coord.x = x as f32;

@@ -7,6 +7,9 @@ frames = 60
 # how many cpu cores to use?
 core_count = 2
 
+# animation speed
+speed = 8.0
+
 # where to save frames when rendering?
 frame_dir = ./frames
 
