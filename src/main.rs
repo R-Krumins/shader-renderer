@@ -32,7 +32,10 @@ fn main() {
     }
     drop(tx);
 
-    println!("Rendering using {} cores...", cfg.core_count);
+    println!(
+        "Rendering '{}' using {} cores...",
+        cfg.shader_name, cfg.core_count
+    );
     print!("\rframe 0/{}", cfg.frames);
     stdout().flush().unwrap();
 

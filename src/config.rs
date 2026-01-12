@@ -19,6 +19,7 @@ pub struct Config {
     pub output: String,
     pub output_format: OutputFormat,
     pub shader: shader::ShaderFn,
+    pub shader_name: String,
 }
 
 impl Config {
@@ -71,8 +72,11 @@ impl Config {
             _ => panic!("invalid output extension! Only support mp4 or gif!"),
         };
 
-        let shader_name = cfg.get("shader").expect("shader not gien in config");
-        let shader = shader::get_shader(shader_name).expect("invalid shader");
+        let shader_name = cfg
+            .get("shader")
+            .expect("shader not gien in config")
+            .to_string();
+        let shader = shader::get_shader(&shader_name).expect("invalid shader");
 
         Config {
             width,
@@ -84,6 +88,7 @@ impl Config {
             output,
             output_format,
             shader,
+            shader_name,
         }
     }
 }
