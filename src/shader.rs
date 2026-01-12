@@ -1,21 +1,36 @@
+use std::collections::HashMap;
+
 use crate::hex;
 use crate::math::*;
+
+pub type ShaderFn = fn(&ShaderArgs) -> Vec3;
+
+pub const SHADER_REGISTER: &[(&str, ShaderFn)] = &[("cyberspace", cyberspace), ("plasma", plasma)];
+
+pub fn get_shader(name: &str) -> Option<ShaderFn> {
+    SHADER_REGISTER
+        .iter()
+        .find(|(n, _)| *n == name)
+        .map(|(_, f)| *f)
+}
 
 #[derive(Clone)]
 pub struct ShaderArgs {
     pub frag_coord: Vec2,
     pub resolution: Vec2,
+    pub frame_count: f32,
     pub time: f32,
-    pub shader: fn(&ShaderArgs) -> Vec3,
+    pub shader: ShaderFn,
 }
 
 impl ShaderArgs {
-    pub fn new(width: usize, height: usize) -> Self {
+    pub fn new(width: usize, height: usize, frame_count: usize, shader: ShaderFn) -> Self {
         Self {
             frag_coord: Vec2::zero(),
             resolution: Vec2::new(width as f32, height as f32),
+            frame_count: frame_count as f32,
             time: 0.0,
-            shader: plasma,
+            shader,
         }
     }
 }

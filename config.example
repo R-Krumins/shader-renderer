@@ -1,0 +1,19 @@
+# video info
+width = 720
+height = 480
+frame_rate = 30
+frames = 60
+
+# how many cpu cores to use?
+core_count = 2
+
+# where to save frames when rendering?
+frame_dir = ./frames
+
+# specify mp4 or gif
+output = ./render.mp4
+
+# what to render?
+# chose: plasma, cyberspace
+shader = plasma
+
