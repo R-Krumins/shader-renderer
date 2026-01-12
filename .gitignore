@@ -1,6 +1,9 @@
 /target
-*.mp4
-*.gif
 frames/
 LOG.md
 config
+
+*.mp4
+*.gif
+!examples/**/*.mp4
+!examples/**/*.gif

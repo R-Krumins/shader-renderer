@@ -25,7 +25,13 @@ pub struct ShaderArgs {
 }
 
 impl ShaderArgs {
-    pub fn new(width: usize, height: usize, frame_count: usize, speed: f32, shader: ShaderFn) -> Self {
+    pub fn new(
+        width: usize,
+        height: usize,
+        frame_count: usize,
+        speed: f32,
+        shader: ShaderFn,
+    ) -> Self {
         Self {
             frag_coord: Vec2::zero(),
             resolution: Vec2::new(width as f32, height as f32),
@@ -47,6 +53,7 @@ pub fn gradient(args: &ShaderArgs) -> Vec3 {
     Vec3::mix(c1, c2, mix_amount)
 }
 
+/// credit: https://x.com/XorDev/status/1986182095614406664
 pub fn cyberspace(args: &ShaderArgs) -> Vec3 {
     let mut i = 0.0;
     let mut z = 0.0;
@@ -78,6 +85,7 @@ pub fn cyberspace(args: &ShaderArgs) -> Vec3 {
     (o / 7e3).tanh()
 }
 
+/// credit: https://x.com/XorDev/status/1894123951401378051
 pub fn plasma(args: &ShaderArgs) -> Vec3 {
     let p = (args.frag_coord * 2.0 - args.resolution) / args.resolution.y;
     let l = Vec2::zero() + (0.7 - p.dot(p)).abs();
