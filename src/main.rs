@@ -12,7 +12,7 @@ mod config;
 mod math;
 mod shader;
 
-use config::Config;
+use config::{Config, OutputFormat};
 use shader::ShaderArgs;
 
 fn main() {
@@ -49,7 +49,10 @@ fn main() {
     let elapsed = time.elapsed();
     println!("\nrendered {} frames in {elapsed:.2?}", cfg.frames);
 
-    make_video(&cfg.frame_dir, &cfg.output, cfg.frame_rate);
+    match cfg.output_format {
+        OutputFormat::MP4 => make_video(&cfg.frame_dir, &cfg.output, cfg.frame_rate),
+        OutputFormat::GIF => make_gif(&cfg.frame_dir, &cfg.output, cfg.frame_rate),
+    }
 }
 
 fn render(mut shader_args: ShaderArgs, frames: Vec<usize>, tx: Sender<()>, frame_dir: String) {
@@ -129,6 +132,52 @@ fn make_video(frame_dir: &str, output: &str, frame_rate: usize) {
         ])
         .status()
         .unwrap();
+    println!("finished! output: {output}");
+}
+
+fn make_gif(frame_dir: &str, output: &str, frame_rate: usize) {
+    println!("Making GIF...");
+
+    let frame_rate = frame_rate.to_string();
+    let frame_pattern = format!("{frame_dir}/f%d.png");
+
+    // Generate a palette for better quality and smaller size
+    Command::new("ffmpeg")
+        .args([
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-framerate",
+            &frame_rate,
+            "-i",
+            &frame_pattern,
+            "-vf",
+            "palettegen",
+            "/tmp/palette.png",
+        ])
+        .status()
+        .unwrap();
+
+    // Create the GIF using the palette
+    Command::new("ffmpeg")
+        .args([
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-y",
+            "-framerate",
+            &frame_rate,
+            "-i",
+            &frame_pattern,
+            "-i",
+            "/tmp/palette.png",
+            "-lavfi",
+            "paletteuse",
+            output,
+        ])
+        .status()
+        .unwrap();
+
     println!("finished! output: {output}");
 }
 
